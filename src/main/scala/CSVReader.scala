@@ -8,8 +8,8 @@ import scala.reflect.runtime.universe.TypeTag
 import scala.reflect.ClassTag
 
 
-case class Movie(movieID: Long, movieTitle: String, movieGenre: String)
-case class Rating(userId: Long, ratingId: Long, movieRating: Integer, timeStamp: Long)
+case class Movie(movieId: Long, movieTitle: String, movieGenre: String)
+case class Rating(userId: Long, movieId: Long, starRating: Integer, timeStamp: Long)
 
 object CSVReader {
   val delimiter = "::"
