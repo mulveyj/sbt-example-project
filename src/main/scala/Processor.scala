@@ -11,7 +11,7 @@ case class RatingReport(ratingMovieID: Int,
                         minRating: Int)
 object Processor {
 
-  def process(movieDf:Dataset[Movie], ratingDf:Dataset[Rating])(implicit spark: SparkSession):Dataset[RatingReport] = {
+  def processMovieRatingAggregates(movieDf:Dataset[Movie], ratingDf:Dataset[Rating])(implicit spark: SparkSession):Dataset[RatingReport] = {
     import spark.implicits._
     val reducedRatingDf = ratingDf
                             .drop("ratingTimestamp")
