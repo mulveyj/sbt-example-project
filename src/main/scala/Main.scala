@@ -1,26 +1,34 @@
 package com.newday.example
-
 import org.apache.spark.sql.SparkSession
 
-object Main extends App {
-  val (pathToMovieFile, pathToRatingsFile, outputFilePathStem) = (args(0), args(1), args(2))
+object MainLocal extends App {
+  val (pathToMovieFile, pathToRatingsFile, outputDirPathStem) = (args(0), args(1), args(2))
   val appName = "NewDayDemo"
+  implicit val spark: SparkSession = SparkSession.builder
+    .master("local")
+    .appName(appName)
+    .getOrCreate
 
-  def run(pathToMovieFile: String, pathToRatingsFile:String, outputFileStem: String):Unit = {
-    val spark = SparkSession.builder
-      .master("local")
-      .appName(appName)
-      .getOrCreate
-    println(pathToMovieFile, pathToRatingsFile, outputFilePathStem)
-    // df1 = CSVReader.read(path1)
-    // df2 = CSVReader.read(path2)
-    // df3 = Processor.processAverages(df1, df2)
-    //filename1 = etc
-    // ParquetWriter.write(df1, filename1)
-    // ParquetWriter.write(df2, filename2)
-    // ParquetWriter.write(df3, filename3)
+  Runner.run(pathToMovieFile, pathToRatingsFile, outputDirPathStem)
+}
+
+
+object Main extends App {
+  val (pathToMovieFile, pathToRatingsFile, outputDirPathStem) = (args(0), args(1), args(2))
+  implicit val spark: SparkSession = SparkSession.builder.getOrCreate
+
+  Runner.run(pathToMovieFile, pathToRatingsFile, outputDirPathStem)
+}
+
+
+object Runner {
+  def run(pathToMovieFile: String, pathToRatingsFile:String, outputDirPathStem: String)(implicit spark: SparkSession):Unit = {
+    val movieDf = CSVReader.read[Movie](pathToMovieFile, Seq("movieId", "movieTitle", "movieGenre"))
+    val ratingsDf = CSVReader.read[Rating](pathToRatingsFile, Seq("userId", "movieId", "starRating", "timeStamp"))
+    val aggregatedDf = Processor.processMovieRatingAggregates(movieDf, ratingsDf)
+    ParquetWriter.write(movieDf, s"${outputDirPathStem}/movies", 3)
+    ParquetWriter.write(ratingsDf, s"${outputDirPathStem}/ratings", 10)
+    ParquetWriter.write(aggregatedDf, s"${outputDirPathStem}/ratingsreport", 3)
     spark.close
   }
-
-  run(pathToMovieFile, pathToRatingsFile, outputFilePathStem)
 }
