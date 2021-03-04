@@ -25,8 +25,8 @@ object Main extends App {
 
 object Runner {
   def run(pathToMovieFile: String, pathToRatingsFile:String, outputDirPathStem: String)(implicit spark: SparkSession):Unit = {
-    val movieDf = CSVReader.read[Movie](pathToMovieFile, Seq("movieId", "movieTitle", "movieGenre"))
-    val ratingsDf = CSVReader.read[Rating](pathToRatingsFile, Seq("userId", "movieId", "starRating", "timeStamp"))
+    val movieDf = CSVReader.read[Movie](pathToMovieFile)
+    val ratingsDf = CSVReader.read[Rating](pathToRatingsFile)
     val movieRatingsDf = Processor.processMovieRatings(movieDf, ratingsDf)
     ParquetWriter.write(movieDf, s"${outputDirPathStem}/movies", 3)
     ParquetWriter.write(ratingsDf, s"${outputDirPathStem}/ratings", 10)
