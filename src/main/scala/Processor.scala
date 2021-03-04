@@ -11,11 +11,12 @@ case class RatingReport(ratingMovieID: Int,
                         minRating: Int)
 object Processor {
 
-  def processMovieRatingAggregates(movieDf:Dataset[Movie], ratingDf:Dataset[Rating])(implicit spark: SparkSession):Dataset[RatingReport] = {
+  def processMovieRatings(movieDf:Dataset[Movie], ratingDf:Dataset[Rating])(implicit spark: SparkSession):Dataset[RatingReport] = {
     import spark.implicits._
     val reducedRatingDf = ratingDf
                             .drop("ratingTimestamp")
                             .withColumnRenamed("movieId", "ratingMovieId")
+//    could be a case for a broadcast join here if performance is not acceptable
     val movieDataWithRatings = movieDf
                               .join(reducedRatingDf,$"ratingMovieID"===$"movieId", "left")
                               .drop("movieId")
@@ -28,4 +29,8 @@ object Processor {
           min($"starRating").alias("minRating")
         ).as[RatingReport]
   }
+
+  // Didn't get to do the bonus task. Would be a window function. Something like:
+//  val windowSpec = Window.partitionBy("userId").orderBy("starRating")
+//  df.withColumn("faveMovies", row_number.over(windowSpec))
 }

@@ -5,15 +5,14 @@ import org.apache.spark.sql.SparkSession
 import org.apache.spark.sql.{Encoder, Encoders}
 import scala.reflect.runtime.universe.TypeTag
 
-import scala.reflect.ClassTag
-
 
 case class Movie(movieId: Long, movieTitle: String, movieGenre: String)
 case class Rating(userId: Long, movieId: Long, starRating: Integer, timeStamp: Long)
 
 object CSVReader {
-  val delimiter = "::"
+  val delimiter = "::" // could be made configurable
 
+  // Clearly it would be better to work with Path variables rather than strings
   def read[T<:Product: TypeTag](fileName: String, columnNames: Seq[String])(implicit spark: SparkSession):Dataset[T] = {
     implicit val enc: Encoder[T] = Encoders.product[T]
     val dfRead: Dataset[Row] = spark.read.format("csv").option("header", "false").option("delimiter", delimiter).option("inferSchema", "true").load(fileName)
